@@ -1,10 +1,28 @@
+"""
+This file contains the evaluation script to evaluate the predicted technical term descriptions from the Large Language Models
+with the gold-standard descriptions. The evaluation metrics that are used to assess the LLMs are: BERTScore, ROGUE, BLEU, METEOR.
+"""
+
 from evaluate import list_evaluation_modules, load
 import pandas as pd
 import numpy as np
 import os
 import re
 
-def main(FILE_DIR):
+def main(file_dir: str) -> None:
+    """
+    This is the main function for the LLM evaluation. It receives the path to the directory that contains the predictions and
+    assess the model performance through several evaluation metrics. The metrics are stored in an excel file for each model as
+    well as the average of all of the models.
+
+    Args:
+        - file_dir (str): The path to the directory that contains the LLM definition predictions
+
+    Output:
+        - None
+    """
+    
+    #setup the evaluation metrics
     bertscore = load("bertscore")
     bleu = load("bleu")
     meteor = load("meteor")
@@ -12,8 +30,9 @@ def main(FILE_DIR):
 
     dataset = []
 
-    for file in os.listdir(FILE_DIR):
-        filepath = os.path.join(FILE_DIR, file)
+    #Loop over all the predictions
+    for file in os.listdir(file_dir):
+        filepath = os.path.join(file_dir, file)
 
         data = pd.read_excel(filepath)
 
@@ -23,11 +42,13 @@ def main(FILE_DIR):
         predictions_no_sentence = list(map(clean_prediction, data['prediction no sentence']))
         predictions_w_sentence = list(map(clean_prediction, data['prediction with sentence']))
 
+        #calculate the scores for the predictions without a context sentence
         results_bertscore_ns = bertscore.compute(predictions=predictions_no_sentence, references=references, model_type="roberta-large-mnli")
         results_bleu_ns = bleu.compute(predictions=predictions_no_sentence, references=references)
         results_meteor_ns = meteor.compute(predictions=predictions_no_sentence, references=references)
         results_rouge_ns = rouge.compute(predictions=predictions_no_sentence, references=references)
 
+        #calculate the scores for the predictions with a context sentence
         results_bertscore_ws = bertscore.compute(predictions=predictions_w_sentence, references=references, model_type="roberta-large-mnli")
         results_bleu_ws = bleu.compute(predictions=predictions_w_sentence, references=references)
         results_meteor_ws = meteor.compute(predictions=predictions_w_sentence, references=references)
@@ -47,18 +68,12 @@ def main(FILE_DIR):
         r_2_ws = round(results_rouge_ws['rouge2'], 2)
         r_l_ws = round(results_rouge_ws['rougeL'], 2)
 
-        bert_score_ws = 0
-        bleu_score_ws = 0
-        meteor_score_ws = 0
-        r_1_ws = 0
-        r_2_ws = 0
-        r_l_ws = 0
-
         data_row = [model_name, r_1_ns, r_2_ns, r_l_ns, meteor_score_ns, bleu_score_ns, bert_score_ns, r_1_ws, r_2_ws, r_l_ws, meteor_score_ws, bleu_score_ws, bert_score_ws]
         dataset.append(data_row)
 
     r_1_ns, r_2_ns, r_l_ns, meteor_score_ns, bleu_score_ns, bert_score_ns, r_1_ws, r_2_ws, r_l_ws, meteor_score_ws, bleu_score_ws, bert_score_ws = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
+    #additionally: calculate the average of the evaluation metrics over all the LLMs
     for i, row in enumerate(dataset):
         i += 1
         r_1_ns += row[1]
@@ -95,5 +110,5 @@ def main(FILE_DIR):
     df.to_excel("llm_evaluation.xlsx", index=False)
 
 if __name__ == '__main__':
-    FILE_DIR = r"text_generation\\data\\cleaned_prediction"
-    main(FILE_DIR)
+    file_dir = r"text_generation\\data\\cleaned_prediction"
+    main(file_dir)
