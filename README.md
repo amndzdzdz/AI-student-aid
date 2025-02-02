@@ -19,12 +19,12 @@ This repository contains the implementation and results of my bachelor thesis ti
 Here are some sample predictions from the NER and definition generation models:
 
 ### Example 1: Named Entity Recognition
-![NER Prediction Example](example_predictions\roberta_base_1.PNG)
+![NER Prediction Example](example_predictions/roberta_base_1.PNG)
 
-![NER Prediction Example](example_predictions\roberta_base_2.PNG)
+![NER Prediction Example](example_predictions/roberta_base_2.PNG)
 
 ### Example 2: Definition Generation
-![Definition Prediction Example](example_predictions\Llama_31_Instruct.png)
+![Definition Prediction Example](example_predictions/Llama_31_Instruct.png)
 
 ## Repository Structure
 
