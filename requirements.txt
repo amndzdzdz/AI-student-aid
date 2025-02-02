@@ -1,0 +1,15 @@
+torch
+transformers
+huggingface_hub
+pandas
+nltk
+datasets
+evaluate
+numpy
+tqdm
+langchain
+sentence-transformers
+flair
+optuna
+matplotlib
+spacy
